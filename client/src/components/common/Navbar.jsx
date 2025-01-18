@@ -70,6 +70,7 @@ const Navbar = () => {
                 {/* Profile dropdown */}
                 <div className="relative">
                   <button
+                    onClick={() => navigate("/profile")}
                     type="button"
                     className="flex items-center space-x-3 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 p-2 rounded-md">
                     <span className="sr-only">Open user menu</span>

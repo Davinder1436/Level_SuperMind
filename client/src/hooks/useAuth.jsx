@@ -1,56 +1,58 @@
-// src/hooks/useAuth.js
-
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 
-// Create Auth Context
 const AuthContext = createContext(null);
-
-// User type definition
-const initialUser = {
-  id: null,
-  name: "",
-  email: "",
-  birthDate: null,
-  birthTime: null,
-  birthLocation: null,
-  gender: null,
-  profileComplete: false,
-};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Get API URL from environment variable
   const API_URL = "http://localhost:3000/api";
 
-  // Configure axios instance
   const authAxios = axios.create({
     baseURL: API_URL,
-    withCredentials: true, // Important for handling cookies
   });
 
-  // Handle API errors
+  // Set auth token in axios header
+  const setAuthToken = (token) => {
+    if (token) {
+      localStorage.setItem("token", token);
+      authAxios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    } else {
+      localStorage.removeItem("token");
+      delete authAxios.defaults.headers.common["Authorization"];
+    }
+  };
+
+  // Check for token on initial load
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setAuthToken(token);
+      checkAuth();
+    } else {
+      setIsLoading(false);
+    }
+  }, []);
+
   const handleError = (error) => {
-    const message =
-      error.response?.data?.message || error.message || "An error occurred";
+    const message = error.response?.data?.message || "An error occurred";
     setError(message);
     return Promise.reject(message);
   };
 
-  // Check if user is already authenticated
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
   const checkAuth = async () => {
     try {
       setIsLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setIsAuthenticated(false);
+        setUser(null);
+        return;
+      }
       const response = await authAxios.get("/auth/me");
-
       if (response.data.user) {
         setUser(response.data.user);
         setIsAuthenticated(true);
@@ -58,21 +60,23 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       setUser(null);
       setIsAuthenticated(false);
+      setAuthToken(null);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Login function
   const login = async (email, password) => {
     try {
       setIsLoading(true);
-      const response = await authAxios.post("/auth/login", {
+      const response = await authAxios.post("/auth/signin", {
         email,
         password,
       });
 
-      setUser(response.data.user);
+      const { user, token } = response.data;
+      setAuthToken(token);
+      setUser(user);
       setIsAuthenticated(true);
       setError(null);
       return response.data;
@@ -83,13 +87,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Register function
   const register = async (userData) => {
     try {
       setIsLoading(true);
-      const response = await authAxios.post("/auth/register", userData);
+      const response = await authAxios.post("/auth/signup", userData);
 
-      setUser(response.data.user);
+      const { user, token } = response.data;
+      setAuthToken(token);
+      setUser(user);
       setIsAuthenticated(true);
       setError(null);
       return response.data;
@@ -100,93 +105,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout function
-  const logout = async () => {
-    try {
-      setIsLoading(true);
-      await authAxios.post("/auth/logout");
-
-      setUser(null);
-      setIsAuthenticated(false);
-      setError(null);
-    } catch (err) {
-      return handleError(err);
-    } finally {
-      setIsLoading(false);
-    }
+  const logout = () => {
+    setAuthToken(null);
+    setUser(null);
+    setIsAuthenticated(false);
+    setError(null);
   };
 
-  // Update user profile
-  const updateProfile = async (profileData) => {
-    try {
-      setIsLoading(true);
-      const response = await authAxios.put("/auth/profile", profileData);
-
-      setUser(response.data.user);
-      setError(null);
-      return response.data;
-    } catch (err) {
-      return handleError(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Password reset request
-  const requestPasswordReset = async (email) => {
-    try {
-      setIsLoading(true);
-      const response = await authAxios.post("/auth/forgot-password", { email });
-      setError(null);
-      return response.data;
-    } catch (err) {
-      return handleError(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Reset password
-  const resetPassword = async (token, newPassword) => {
-    try {
-      setIsLoading(true);
-      const response = await authAxios.post("/auth/reset-password", {
-        token,
-        password: newPassword,
-      });
-      setError(null);
-      return response.data;
-    } catch (err) {
-      return handleError(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Complete birth details
-  const completeBirthDetails = async (birthDetails) => {
-    try {
-      setIsLoading(true);
-      const response = await authAxios.post(
-        "/auth/birth-details",
-        birthDetails
-      );
-
-      setUser({
-        ...user,
-        ...response.data.user,
-        profileComplete: true,
-      });
-      setError(null);
-      return response.data;
-    } catch (err) {
-      return handleError(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Auth context value
   const value = {
     user,
     isAuthenticated,
@@ -195,17 +120,12 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    updateProfile,
-    requestPasswordReset,
-    resetPassword,
-    completeBirthDetails,
     clearError: () => setError(null),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Custom hook to use auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -213,5 +133,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-export default useAuth;

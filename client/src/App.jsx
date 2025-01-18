@@ -33,12 +33,26 @@ const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div>Loading...</div>; // Replace with proper loading component
+    return <div>Loading...</div>;
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  // if (!isAuthenticated) {
+  //   return <Navigate to="/login" replace />;
+  // }
+
+  return children;
+};
+
+const AuthRoute = ({ children }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
+
+  // if (isAuthenticated) {
+  //   return <Navigate to="/dashboard" replace />;
+  // }
 
   return children;
 };
@@ -46,10 +60,24 @@ const ProtectedRoute = ({ children }) => {
 const App = () => {
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* Auth Routes - will redirect to dashboard if logged in */}
       <Route element={<AuthLayout />}>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/login"
+          element={
+            <AuthRoute>
+              <LoginPage />
+            </AuthRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <AuthRoute>
+              <RegisterPage />
+            </AuthRoute>
+          }
+        />
       </Route>
 
       {/* Public Routes with Main Layout */}
