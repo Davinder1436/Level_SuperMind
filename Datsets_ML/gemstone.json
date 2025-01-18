@@ -1,0 +1,87 @@
+{
+    "Aries": {
+      "Ruling Planet": "Mars",
+      "Gemstones": [
+        {"Gemstone": "Red Coral", "Description": "Enhances courage and vitality."},
+        {"Gemstone": "Bloodstone", "Description": "Promotes strength and endurance."}
+      ]
+    },
+    "Taurus": {
+      "Ruling Planet": "Venus",
+      "Gemstones": [
+        {"Gemstone": "Emerald", "Description": "Brings prosperity and harmony."},
+        {"Gemstone": "Lapis Lazuli", "Description": "Encourages wisdom and truth."}
+      ]
+    },
+    "Gemini": {
+      "Ruling Planet": "Mercury",
+      "Gemstones": [
+        {"Gemstone": "Agate", "Description": "Improves communication and intellect."},
+        {"Gemstone": "Citrine", "Description": "Stimulates creativity and mental clarity."}
+      ]
+    },
+    "Cancer": {
+      "Ruling Planet": "Moon",
+      "Gemstones": [
+        {"Gemstone": "Pearl", "Description": "Enhances emotional balance and intuition."},
+        {"Gemstone": "Moonstone", "Description": "Promotes inner growth and strength."}
+      ]
+    },
+    "Leo": {
+      "Ruling Planet": "Sun",
+      "Gemstones": [
+        {"Gemstone": "Ruby", "Description": "Boosts confidence and vitality."},
+        {"Gemstone": "Peridot", "Description": "Encourages abundance and prosperity."}
+      ]
+    },
+    "Virgo": {
+      "Ruling Planet": "Mercury",
+      "Gemstones": [
+        {"Gemstone": "Sapphire", "Description": "Enhances wisdom and mental clarity."},
+        {"Gemstone": "Carnelian", "Description": "Promotes creativity and motivation."}
+      ]
+    },
+    "Libra": {
+      "Ruling Planet": "Venus",
+      "Gemstones": [
+        {"Gemstone": "Opal", "Description": "Encourages love and passion."},
+        {"Gemstone": "Peridot", "Description": "Brings harmony and balance."}
+      ]
+    },
+    "Scorpio": {
+      "Ruling Planet": "Mars",
+      "Gemstones": [
+        {"Gemstone": "Topaz", "Description": "Enhances strength and courage."},
+        {"Gemstone": "Aquamarine", "Description": "Promotes emotional healing and clarity."}
+      ]
+    },
+    "Sagittarius": {
+      "Ruling Planet": "Jupiter",
+      "Gemstones": [
+        {"Gemstone": "Turquoise", "Description": "Encourages optimism and good fortune."},
+        {"Gemstone": "Amethyst", "Description": "Promotes spiritual growth and tranquility."}
+      ]
+    },
+    "Capricorn": {
+      "Ruling Planet": "Saturn",
+      "Gemstones": [
+        {"Gemstone": "Garnet", "Description": "Enhances determination and perseverance."},
+        {"Gemstone": "Onyx", "Description": "Provides strength and support."}
+      ]
+    },
+    "Aquarius": {
+      "Ruling Planet": "Uranus",
+      "Gemstones": [
+        {"Gemstone": "Amethyst", "Description": "Promotes spiritual awareness and intuition."},
+        {"Gemstone": "Garnet", "Description": "Encourages passion and energy."}
+      ]
+    },
+    "Pisces": {
+      "Ruling Planet": "Neptune",
+      "Gemstones": [
+        {"Gemstone": "Aquamarine", "Description": "Enhances intuition and emotional healing."},
+        {"Gemstone": "Jade", "Description": "Promotes serenity and balance."}
+      ]
+    }
+  }
+  
