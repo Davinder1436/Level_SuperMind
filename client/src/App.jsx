@@ -8,8 +8,8 @@ import AuthLayout from "./layouts/AuthLayout";
 
 // Public Pages
 import LandingPage from "./pages/public/LandingPage";
-import LoginPage from "./pages/public/LoginPage";
-import RegisterPage from "./pages/public/RegisterPage";
+import { LoginPage } from "./pages/public/Auth";
+import { RegisterPage } from "./pages/public/Auth";
 import AboutPage from "./pages/public/AboutPage";
 import ContactPage from "./pages/public/ContactPage";
 

@@ -1,7 +1,314 @@
-import React from "react";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Brain,
+  Moon,
+  Heart,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Timer,
+  Flower,
+  Sparkles,
+  Star,
+  RefreshCcw,
+  Plus,
+} from "lucide-react";
+
+// Meditation Timer Component
+const MeditationTimer = ({ duration, isActive, onToggle }) => {
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
+  };
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="relative w-40 h-40 mb-6">
+        {/* Timer Circle */}
+        <svg className="w-full h-full transform -rotate-90">
+          <circle
+            cx="80"
+            cy="80"
+            r="70"
+            fill="none"
+            stroke="#151616"
+            strokeWidth="2"
+            className="opacity-10"
+          />
+          <circle
+            cx="80"
+            cy="80"
+            r="70"
+            fill="none"
+            stroke="#D6F32F"
+            strokeWidth="4"
+            strokeDasharray={440}
+            strokeDashoffset={440 * (1 - duration / 900)} // 15 minutes = 900 seconds
+            className="transition-all duration-1000"
+          />
+        </svg>
+
+        {/* Timer Text */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-3xl font-bold text-[#151616]">
+            {formatTime(duration)}
+          </span>
+          <span className="text-sm text-[#151616]/70">remaining</span>
+        </div>
+      </div>
+
+      {/* Control Button */}
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={onToggle}
+        className="w-16 h-16 bg-[#D6F32F] rounded-full border-2 border-[#151616] shadow-[4px_4px_0px_0px_#151616] 
+          hover:shadow-[2px_2px_0px_0px_#151616] hover:translate-x-[2px] hover:translate-y-[2px] transition-all
+          flex items-center justify-center">
+        {isActive ? (
+          <Pause className="w-6 h-6 text-[#151616]" />
+        ) : (
+          <Play className="w-6 h-6 text-[#151616] ml-1" />
+        )}
+      </motion.button>
+    </div>
+  );
+};
+
+// Meditation Card Component
+const MeditationCard = ({ meditation, onSelect }) => (
+  <motion.div
+    whileHover={{ y: -5 }}
+    className="bg-white rounded-xl border-2 border-[#151616] shadow-[4px_4px_0px_0px_#151616] overflow-hidden 
+      cursor-pointer"
+    onClick={onSelect}>
+    <div className="p-6">
+      <div className="flex items-start gap-4">
+        <div
+          className={`w-16 h-16 ${meditation.color} rounded-xl flex items-center justify-center border-2 border-[#151616]`}>
+          <meditation.icon className="w-8 h-8 text-[#151616]" />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-xl font-bold text-[#151616] mb-2">
+            {meditation.name}
+          </h3>
+          <div className="flex items-center gap-4 text-[#151616]/70 text-sm">
+            <div className="flex items-center gap-1">
+              <Timer className="w-4 h-4" />
+              {meditation.duration} mins
+            </div>
+            <div className="flex items-center gap-1">
+              <Volume2 className="w-4 h-4" />
+              {meditation.type}
+            </div>
+          </div>
+        </div>
+      </div>
+      <p className="mt-4 text-[#151616]/70">{meditation.description}</p>
+    </div>
+  </motion.div>
+);
+
+// Recent Session Card Component
+const RecentSessionCard = ({ session }) => (
+  <motion.div
+    whileHover={{ scale: 1.02 }}
+    className="bg-white p-4 rounded-xl border-2 border-[#151616]">
+    <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center gap-2">
+        <session.icon className="w-5 h-5 text-[#151616]" />
+        <span className="font-bold text-[#151616]">{session.type}</span>
+      </div>
+      <span className="text-sm text-[#151616]/70">{session.date}</span>
+    </div>
+    <div className="flex items-center gap-2 text-[#151616]/70 text-sm">
+      <Timer className="w-4 h-4" />
+      {session.duration} minutes completed
+    </div>
+  </motion.div>
+);
 
 const MeditationPage = () => {
-  return <div>MeditationPage</div>;
+  const [isActive, setIsActive] = useState(false);
+  const [duration, setDuration] = useState(900); // 15 minutes in seconds
+  const [isMuted, setIsMuted] = useState(false);
+
+  const meditations = [
+    {
+      name: "Mindful Breathing",
+      icon: Brain,
+      color: "bg-[#FFE8EC]",
+      duration: 15,
+      type: "Guided",
+      description:
+        "A gentle meditation focusing on breath awareness and mental clarity.",
+    },
+    {
+      name: "Heart Chakra",
+      icon: Heart,
+      color: "bg-[#E8F4FF]",
+      duration: 20,
+      type: "Music",
+      description:
+        "Open and balance your heart chakra with this loving-kindness meditation.",
+    },
+    {
+      name: "Moon Meditation",
+      icon: Moon,
+      color: "bg-[#E8FFE8]",
+      duration: 10,
+      type: "Silent",
+      description:
+        "Connect with lunar energy through this calming nighttime practice.",
+    },
+  ];
+
+  const recentSessions = [
+    {
+      type: "Mindful Breathing",
+      icon: Brain,
+      duration: 15,
+      date: "Today",
+    },
+    {
+      type: "Heart Chakra",
+      icon: Heart,
+      duration: 20,
+      date: "Yesterday",
+    },
+    {
+      type: "Moon Meditation",
+      icon: Moon,
+      duration: 10,
+      date: "2 days ago",
+    },
+  ];
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2 mb-2">
+          <Flower className="w-5 h-5 text-[#151616]" />
+          <span className="text-[#151616]/70">Daily Practice</span>
+        </motion.div>
+        <h1 className="text-3xl font-bold text-[#151616]">Meditation Space</h1>
+      </div>
+
+      {/* Current Session */}
+      <div className="bg-white rounded-xl p-8 border-2 border-[#151616] shadow-[4px_4px_0px_0px_#151616]">
+        <div className="max-w-md mx-auto">
+          {/* Meditation Controls */}
+          <div className="flex justify-center mb-8">
+            <MeditationTimer
+              duration={duration}
+              isActive={isActive}
+              onToggle={() => setIsActive(!isActive)}
+            />
+          </div>
+
+          {/* Control Buttons */}
+          <div className="flex justify-center gap-4">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsMuted(!isMuted)}
+              className="p-3 rounded-xl border-2 border-[#151616] hover:bg-[#D6F32F]/10">
+              {isMuted ? (
+                <VolumeX className="w-5 h-5 text-[#151616]" />
+              ) : (
+                <Volume2 className="w-5 h-5 text-[#151616]" />
+              )}
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setDuration(900)}
+              className="p-3 rounded-xl border-2 border-[#151616] hover:bg-[#D6F32F]/10">
+              <RefreshCcw className="w-5 h-5 text-[#151616]" />
+            </motion.button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <motion.div
+          whileHover={{ y: -5 }}
+          className="bg-white p-6 rounded-xl border-2 border-[#151616] shadow-[4px_4px_0px_0px_#151616]">
+          <div className="flex items-center gap-2 mb-2">
+            <Star className="w-5 h-5 text-[#151616]" />
+            <h3 className="font-bold text-[#151616]">Current Streak</h3>
+          </div>
+          <p className="text-3xl font-bold text-[#151616]">7 Days</p>
+        </motion.div>
+
+        <motion.div
+          whileHover={{ y: -5 }}
+          className="bg-white p-6 rounded-xl border-2 border-[#151616] shadow-[4px_4px_0px_0px_#151616]">
+          <div className="flex items-center gap-2 mb-2">
+            <Timer className="w-5 h-5 text-[#151616]" />
+            <h3 className="font-bold text-[#151616]">Total Minutes</h3>
+          </div>
+          <p className="text-3xl font-bold text-[#151616]">345</p>
+        </motion.div>
+
+        <motion.div
+          whileHover={{ y: -5 }}
+          className="bg-white p-6 rounded-xl border-2 border-[#151616] shadow-[4px_4px_0px_0px_#151616]">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="w-5 h-5 text-[#151616]" />
+            <h3 className="font-bold text-[#151616]">Sessions</h3>
+          </div>
+          <p className="text-3xl font-bold text-[#151616]">24</p>
+        </motion.div>
+      </div>
+
+      {/* Meditations Section */}
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-[#151616]">
+            Meditation Library
+          </h2>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="p-2 rounded-lg hover:bg-[#D6F32F]/10">
+            <Plus className="w-5 h-5 text-[#151616]" />
+          </motion.button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {meditations.map((meditation, index) => (
+            <MeditationCard
+              key={index}
+              meditation={meditation}
+              onSelect={() => setDuration(meditation.duration * 60)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Recent Sessions */}
+      <div>
+        <h2 className="text-xl font-bold text-[#151616] mb-6">
+          Recent Sessions
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {recentSessions.map((session, index) => (
+            <RecentSessionCard key={index} session={session} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default MeditationPage;
