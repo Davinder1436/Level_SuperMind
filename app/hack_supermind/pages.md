@@ -1,6 +1,6 @@
 # Spiritual Practice Guide
 
-## 1. Breathing Placard
+## 1. Pranayama Placard
 
 ### 1. Deep Breathing (Simple)
 
