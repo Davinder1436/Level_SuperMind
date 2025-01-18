@@ -1,12 +1,16 @@
+// src/types/user.types.ts
 export interface UserInput {
-    name: string;
     email: string;
+    name: string;
     password?: string;
-    dob: string; // Format: YYYY-MM-DD
-    time: string; // Format: HH:mm:ss
-    gender: 'male' | 'female' | 'other';
+    dob: string;
+    time: string;
+    gender: string;
     state: string;
     city: string;
+    longitude?: number;
+    latitude?: number;
+    timezone?: number;
   }
   
   export interface UserResponse {
@@ -17,5 +21,8 @@ export interface UserInput {
     gender: string;
     state: string;
     city: string;
+    longitude: number;
+    latitude: number;
+    timezone: number;
     created_at: Date;
   }
