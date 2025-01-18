@@ -36,9 +36,9 @@ const ProtectedRoute = ({ children }) => {
     return <div>Loading...</div>;
   }
 
-  // if (!isAuthenticated) {
-  //   return <Navigate to="/login" replace />;
-  // }
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
   return children;
 };
@@ -50,9 +50,9 @@ const AuthRoute = ({ children }) => {
     return <div>Loading...</div>;
   }
 
-  // if (isAuthenticated) {
-  //   return <Navigate to="/dashboard" replace />;
-  // }
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return children;
 };

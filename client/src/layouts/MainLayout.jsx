@@ -18,11 +18,11 @@ const MainLayout = () => {
 
       <div className="flex">
         {/* Show sidebar only for authenticated users and non-public routes */}
-        {/* {isAuthenticated && !isPublicRoute && (
+        {isAuthenticated && !isPublicRoute && (
           <Sidebar className="w-64 hidden lg:block" />
-        )} */}
+        )}
 
-        <Sidebar className="w-64 hidden lg:block" />
+        {/* <Sidebar className="w-64 hidden lg:block" /> */}
 
         <main className="flex-1 p-4 lg:p-8">
           {/* Mobile sidebar toggle for authenticated users */}
@@ -52,17 +52,16 @@ const MainLayout = () => {
           )}
 
           {/* Page content */}
-          {/* <div
+          <div
             className={`${
               isAuthenticated && !isPublicRoute ? "lg:ml-64" : ""
             }`}>
             <Outlet />
-          </div> */}
-
-          {/* without signin */}
-          <div className="lg:ml-64">
-            <Outlet />
           </div>
+
+          {/* <div className="lg:ml-64">
+            <Outlet />
+          </div> */}
         </main>
       </div>
 

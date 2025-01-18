@@ -6,7 +6,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Start with loading true
   const [error, setError] = useState(null);
 
   const API_URL = "http://localhost:3000/api";
@@ -26,44 +26,61 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Check for token on initial load
+  // Check for token and verify authentication on initial load
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      setAuthToken(token);
-      checkAuth();
-    } else {
+    const initializeAuth = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        setAuthToken(token);
+        try {
+          const response = await authAxios.get("/auth/me");
+          if (response.data.user) {
+            setUser(response.data.user);
+            setIsAuthenticated(true);
+          } else {
+            // Invalid user data - clear everything
+            setAuthToken(null);
+            setUser(null);
+            setIsAuthenticated(false);
+          }
+        } catch (err) {
+          // Token validation failed - clear everything
+          setAuthToken(null);
+          setUser(null);
+          setIsAuthenticated(false);
+        }
+      }
       setIsLoading(false);
-    }
+    };
+
+    initializeAuth();
+  }, []);
+
+  // Set up axios interceptor for 401 responses
+  useEffect(() => {
+    const interceptor = authAxios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          // Unauthorized - clear everything
+          setAuthToken(null);
+          setUser(null);
+          setIsAuthenticated(false);
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      // Clean up interceptor on unmount
+      authAxios.interceptors.response.eject(interceptor);
+    };
   }, []);
 
   const handleError = (error) => {
     const message = error.response?.data?.message || "An error occurred";
     setError(message);
     return Promise.reject(message);
-  };
-
-  const checkAuth = async () => {
-    try {
-      setIsLoading(true);
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setIsAuthenticated(false);
-        setUser(null);
-        return;
-      }
-      const response = await authAxios.get("/auth/me");
-      if (response.data.user) {
-        setUser(response.data.user);
-        setIsAuthenticated(true);
-      }
-    } catch (err) {
-      setUser(null);
-      setIsAuthenticated(false);
-      setAuthToken(null);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const login = async (email, password) => {
