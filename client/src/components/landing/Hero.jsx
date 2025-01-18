@@ -40,7 +40,7 @@ const FloatingElement = ({ children, delay = 0 }) => (
 
 const Hero = () => {
   return (
-    <div className="min-h-screen bg-[#FFFFF4] relative overflow-hidden pt-12">
+    <div className="min-h-screen bg-[#FFFFF4] relative overflow-hidden pt-8">
       {/* Background Pattern */}
       <div className="absolute inset-0 pointer-events-none">
         <div
