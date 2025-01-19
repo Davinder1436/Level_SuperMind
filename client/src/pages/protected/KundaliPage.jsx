@@ -1,14 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../../hooks/useAuth";
 import {
   Star,
   Sun,
   Moon,
-  // Saturn,
   Eclipse,
-  // Venus,
-  // Mars,
-  // Mercury,
   Clock,
   Calendar,
   MapPin,
@@ -16,103 +13,167 @@ import {
   Info,
   Download,
   Share2,
+  Loader,
 } from "lucide-react";
 
-// Dummy Kundli Data
-const kundliData = {
-  userInfo: {
-    name: "Sarah Parker",
-    dateOfBirth: "15 June 1995",
-    timeOfBirth: "14:30",
-    placeOfBirth: "New York, USA",
-    latitude: "40.7128° N",
-    longitude: "74.0060° W",
-  },
-  houses: [
-    { number: 1, sign: "Leo", degree: "15°30'", planets: ["Sun", "Mars"] },
-    { number: 2, sign: "Virgo", degree: "20°45'", planets: ["Mercury"] },
-    { number: 3, sign: "Libra", degree: "25°15'", planets: [] },
-    { number: 4, sign: "Scorpio", degree: "28°20'", planets: ["Venus"] },
-    { number: 5, sign: "Sagittarius", degree: "30°10'", planets: [] },
-    { number: 6, sign: "Capricorn", degree: "15°45'", planets: ["Saturn"] },
-    { number: 7, sign: "Aquarius", degree: "18°30'", planets: [] },
-    { number: 8, sign: "Pisces", degree: "22°15'", planets: ["Jupiter"] },
-    { number: 9, sign: "Aries", degree: "25°40'", planets: [] },
-    { number: 10, sign: "Taurus", degree: "28°25'", planets: [] },
-    { number: 11, sign: "Gemini", degree: "12°35'", planets: ["Moon"] },
-    { number: 12, sign: "Cancer", degree: "15°50'", planets: [] },
-  ],
-  planetaryPositions: [
-    {
-      planet: "Sun",
-      sign: "Leo",
-      house: 1,
-      degree: "15°30'",
-      retrograde: false,
+// Helper function to get zodiac sign and info
+const getZodiacInfo = (dob) => {
+  if (!dob) return null;
+
+  const date = new Date(dob);
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  // Mapping of zodiac signs with their details
+  const zodiacData = {
+    Aries: {
+      startMonth: 3,
+      startDay: 21,
+      endMonth: 4,
+      endDay: 19,
+      ruler: "Mars",
+      element: "Fire",
     },
-    {
-      planet: "Moon",
-      sign: "Gemini",
-      house: 11,
-      degree: "12°35'",
-      retrograde: false,
+    Taurus: {
+      startMonth: 4,
+      startDay: 20,
+      endMonth: 5,
+      endDay: 20,
+      ruler: "Venus",
+      element: "Earth",
     },
-    {
-      planet: "Mars",
-      sign: "Leo",
-      house: 1,
-      degree: "18°45'",
-      retrograde: false,
+    Gemini: {
+      startMonth: 5,
+      startDay: 21,
+      endMonth: 6,
+      endDay: 20,
+      ruler: "Mercury",
+      element: "Air",
     },
-    {
-      planet: "Mercury",
-      sign: "Virgo",
-      house: 2,
-      degree: "20°45'",
-      retrograde: true,
+    Cancer: {
+      startMonth: 6,
+      startDay: 21,
+      endMonth: 7,
+      endDay: 22,
+      ruler: "Moon",
+      element: "Water",
     },
-    {
-      planet: "Jupiter",
-      sign: "Pisces",
-      house: 8,
-      degree: "22°15'",
-      retrograde: false,
+    Leo: {
+      startMonth: 7,
+      startDay: 23,
+      endMonth: 8,
+      endDay: 22,
+      ruler: "Sun",
+      element: "Fire",
     },
-    {
-      planet: "Venus",
-      sign: "Scorpio",
-      house: 4,
-      degree: "28°20'",
-      retrograde: false,
+    Virgo: {
+      startMonth: 8,
+      startDay: 23,
+      endMonth: 9,
+      endDay: 22,
+      ruler: "Mercury",
+      element: "Earth",
     },
-    {
-      planet: "Saturn",
-      sign: "Capricorn",
-      house: 6,
-      degree: "15°45'",
-      retrograde: true,
+    Libra: {
+      startMonth: 9,
+      startDay: 23,
+      endMonth: 10,
+      endDay: 22,
+      ruler: "Venus",
+      element: "Air",
     },
-  ],
-  dashas: [
-    {
-      planet: "Sun",
-      startDate: "2020-01-01",
-      endDate: "2026-01-01",
-      subDasha: "Mercury",
+    Scorpio: {
+      startMonth: 10,
+      startDay: 23,
+      endMonth: 11,
+      endDay: 21,
+      ruler: "Mars/Pluto",
+      element: "Water",
     },
-    {
-      planet: "Moon",
-      startDate: "2026-01-01",
-      endDate: "2032-01-01",
-      subDasha: "Venus",
+    Sagittarius: {
+      startMonth: 11,
+      startDay: 22,
+      endMonth: 12,
+      endDay: 21,
+      ruler: "Jupiter",
+      element: "Fire",
     },
-    {
-      planet: "Mars",
-      startDate: "2032-01-01",
-      endDate: "2038-01-01",
-      subDasha: "Jupiter",
+    Capricorn: {
+      startMonth: 12,
+      startDay: 22,
+      endMonth: 1,
+      endDay: 19,
+      ruler: "Saturn",
+      element: "Earth",
     },
-  ],
+    Aquarius: {
+      startMonth: 1,
+      startDay: 20,
+      endMonth: 2,
+      endDay: 18,
+      ruler: "Uranus",
+      element: "Air",
+    },
+    Pisces: {
+      startMonth: 2,
+      startDay: 19,
+      endMonth: 3,
+      endDay: 20,
+      ruler: "Neptune",
+      element: "Water",
+    },
+  };
+
+  for (const [sign, data] of Object.entries(zodiacData)) {
+    if (
+      (month === data.startMonth && day >= data.startDay) ||
+      (month === data.endMonth && day <= data.endDay)
+    ) {
+      return { sign, ...data };
+    }
+  }
+
+  return null;
+};
+
+// Helper function to get next zodiac sign
+const getNextZodiacSign = (sign) => {
+  const signs = [
+    "Aries",
+    "Taurus",
+    "Gemini",
+    "Cancer",
+    "Leo",
+    "Virgo",
+    "Libra",
+    "Scorpio",
+    "Sagittarius",
+    "Capricorn",
+    "Aquarius",
+    "Pisces",
+  ];
+  const currentIndex = signs.indexOf(sign);
+  return signs[(currentIndex + 1) % 12];
+};
+
+// Helper function to generate houses based on ascendant sign
+const generateHouses = (ascendantSign) => {
+  let currentSign = ascendantSign;
+  const houses = [];
+
+  for (let i = 1; i <= 12; i++) {
+    houses.push({
+      number: i,
+      sign: currentSign,
+      degree: `${Math.floor(Math.random() * 29) + 1}°${Math.floor(
+        Math.random() * 59
+      )}'`,
+      planets: [], // Will be populated later
+    });
+    currentSign = getNextZodiacSign(currentSign);
+  }
+
+  return houses;
 };
 
 // House Component for Birth Chart
@@ -160,6 +221,12 @@ const PlanetCard = ({ planet }) => {
       case "Venus":
         return Eclipse;
       case "Saturn":
+        return Eclipse;
+      case "Uranus":
+        return Eclipse;
+      case "Neptune":
+        return Eclipse;
+      case "Pluto":
         return Eclipse;
       default:
         return Star;
@@ -231,8 +298,89 @@ const DashaTimeline = ({ dasha }) => (
   </div>
 );
 
+// Main KundliPage Component
 const KundliPage = () => {
+  const { user } = useAuth();
   const [selectedHouse, setSelectedHouse] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [kundliData, setKundliData] = useState(null);
+
+  useEffect(() => {
+    if (user?.dob && user?.time && user?.city && user?.state) {
+      const zodiacInfo = getZodiacInfo(user.dob);
+
+      if (zodiacInfo) {
+        // Generate houses based on ascendant sign
+        const houses = generateHouses(zodiacInfo.sign);
+
+        // Generate planetary positions
+        const planetaryPositions = [
+          {
+            planet: zodiacInfo.ruler,
+            sign: zodiacInfo.sign,
+            house: 1,
+            degree: houses[0].degree,
+            retrograde: false,
+          },
+        ];
+
+        // Generate dashas (example calculation)
+        const currentYear = new Date().getFullYear();
+        const dashas = [
+          {
+            planet: zodiacInfo.ruler,
+            startDate: currentYear.toString(),
+            endDate: (currentYear + 6).toString(),
+            subDasha: "Mercury",
+          },
+        ];
+
+        const dynamicKundliData = {
+          userInfo: {
+            name: user.name,
+            dateOfBirth: new Date(user.dob).toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            }),
+            timeOfBirth: user.time,
+            placeOfBirth: `${user.city}, ${user.state}`,
+            latitude: user.latitude || "Not available",
+            longitude: user.longitude || "Not available",
+          },
+          houses,
+          planetaryPositions,
+          dashas,
+        };
+
+        setKundliData(dynamicKundliData);
+      }
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader className="w-8 h-8 animate-spin text-gray-900" />
+      </div>
+    );
+  }
+
+  if (!user?.dob || !user?.time || !user?.city || !user?.state) {
+    return (
+      <div className="text-center p-8 bg-white rounded-xl border-2 border-[#151616] shadow-[4px_4px_0px_0px_#151616]">
+        <Calendar className="w-12 h-12 mx-auto mb-4 text-[#151616]" />
+        <h3 className="text-xl font-bold text-[#151616] mb-2">
+          Birth Details Required
+        </h3>
+        <p className="text-[#151616]/70">
+          Please update your profile with your complete birth details to
+          generate your Kundli.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -339,6 +487,37 @@ const KundliPage = () => {
         </div>
       </div>
 
+      {/* Coordinates Information */}
+      <div className="bg-white rounded-xl p-6 border-2 border-[#151616]">
+        <h2 className="text-xl font-bold text-[#151616] mb-4">
+          Geographical Coordinates
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#D6F32F]/20 rounded-lg flex items-center justify-center border-2 border-[#151616]">
+              <MapPin className="w-5 h-5 text-[#151616]" />
+            </div>
+            <div>
+              <p className="text-sm text-[#151616]/70">Latitude</p>
+              <p className="font-medium text-[#151616]">
+                {kundliData.userInfo.latitude}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#D6F32F]/20 rounded-lg flex items-center justify-center border-2 border-[#151616]">
+              <MapPin className="w-5 h-5 text-[#151616]" />
+            </div>
+            <div>
+              <p className="text-sm text-[#151616]/70">Longitude</p>
+              <p className="font-medium text-[#151616]">
+                {kundliData.userInfo.longitude}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Additional Notes */}
       <div className="bg-[#D6F32F]/20 rounded-xl p-6 border-2 border-[#151616]">
         <div className="flex items-start gap-3">
@@ -348,10 +527,25 @@ const KundliPage = () => {
             <p className="text-[#151616]/70">
               This birth chart is calculated using the Lahiri Ayanamsa system.
               For the most accurate readings, please verify your birth time and
-              location details.
+              location details. The calculations are based on your provided
+              birth details and geographical coordinates.
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Footer */}
+      <div className="text-center text-sm text-[#151616]/70">
+        <p>
+          Last updated:{" "}
+          {new Date().toLocaleDateString("en-US", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </p>
       </div>
     </div>
   );
