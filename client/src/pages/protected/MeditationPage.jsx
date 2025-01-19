@@ -330,28 +330,6 @@ const MeditationPage = () => {
               onToggle={() => setIsActive(!isActive)}
             />
           </div>
-
-          {/* Control Buttons */}
-          <div className="flex justify-center gap-4">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setIsMuted(!isMuted)}
-              className="p-3 rounded-xl border-2 border-[#151616] hover:bg-[#D6F32F]/10">
-              {isMuted ? (
-                <VolumeX className="w-5 h-5 text-[#151616]" />
-              ) : (
-                <Volume2 className="w-5 h-5 text-[#151616]" />
-              )}
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setDuration(900)}
-              className="p-3 rounded-xl border-2 border-[#151616] hover:bg-[#D6F32F]/10">
-              <RefreshCcw className="w-5 h-5 text-[#151616]" />
-            </motion.button>
-          </div>
         </div>
       </div>
 
