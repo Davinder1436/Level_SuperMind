@@ -10,6 +10,7 @@ import {
   CircleDot,
   Triangle,
   Square,
+  Download,
 } from "lucide-react";
 
 const FeatureCard = ({ icon: Icon, title, description, delay }) => (
@@ -193,19 +194,24 @@ const Hero = () => {
           </p>
 
           <div className="flex gap-4 justify-center">
-            <motion.button
+            <motion.a
+              href="/login"
               className="bg-[#D6F32F] px-8 py-4 rounded-2xl text-xl font-bold text-[#151616] border-2 border-[#151616] shadow-[4px_4px_0px_0px_#151616] hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_#151616] transition-all duration-200 flex items-center gap-2"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}>
               Start Your Journey
               <ArrowRight className="w-5 h-5" />
-            </motion.button>
-            <motion.button
-              className="px-8 py-4 rounded-2xl text-xl font-bold border-2 border-[#151616] hover:bg-[#151616]/5 transition-all duration-200 text-[#151616] shadow-[4px_4px_0px_0px_#D6F32F]"
+            </motion.a>
+            <motion.a
+              href="https://github.com/Davinder1436/Level_SuperMind/releases/tag/SoulBuddy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-8 py-4 rounded-2xl text-xl font-bold border-2 border-[#151616] hover:bg-[#151616]/5 transition-all duration-200 text-[#151616] shadow-[4px_4px_0px_0px_#D6F32F] flex items-center gap-2"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}>
-              Learn More
-            </motion.button>
+              Download App
+              <Download className="w-5 h-5" />
+            </motion.a>
           </div>
         </motion.div>
 
