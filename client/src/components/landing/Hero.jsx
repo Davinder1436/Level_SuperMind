@@ -7,6 +7,9 @@ import {
   ArrowRight,
   Flower,
   ScrollText,
+  CircleDot,
+  Triangle,
+  Square,
 } from "lucide-react";
 
 const FeatureCard = ({ icon: Icon, title, description, delay }) => (
@@ -23,20 +26,95 @@ const FeatureCard = ({ icon: Icon, title, description, delay }) => (
   </motion.div>
 );
 
-const FloatingElement = ({ children, delay = 0 }) => (
+const FloatingElement = ({ children, delay = 0, rotate = false }) => (
   <motion.div
     initial={{ y: 10 }}
-    animate={{ y: -10 }}
+    animate={{
+      y: [-10, 10],
+      rotate: rotate ? [-10, 10] : 0,
+    }}
     transition={{
-      duration: 2,
-      repeat: Infinity,
-      repeatType: "reverse",
-      ease: "easeInOut",
-      delay,
+      y: {
+        duration: 2,
+        repeat: Infinity,
+        repeatType: "reverse",
+        ease: "easeInOut",
+        delay,
+      },
+      rotate: {
+        duration: 3,
+        repeat: Infinity,
+        repeatType: "reverse",
+        ease: "easeInOut",
+        delay,
+      },
     }}>
     {children}
   </motion.div>
 );
+
+const GeometricBackground = () => {
+  const shapes = Array(6).fill(null);
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {shapes.map((_, index) => (
+        <motion.div
+          key={index}
+          className="absolute"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0.1, 0.3, 0.1] }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            delay: index * 0.5,
+          }}
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+          }}>
+          {index % 3 === 0 ? (
+            <CircleDot className="w-16 h-16 text-[#D6F32F]" />
+          ) : index % 3 === 1 ? (
+            <Triangle className="w-16 h-16 text-[#151616]" />
+          ) : (
+            <Square className="w-16 h-16 text-[#D6F32F]" />
+          )}
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
+const ParticleEffect = () => {
+  const particles = Array(20).fill(null);
+
+  return (
+    <div className="absolute inset-0 pointer-events-none">
+      {particles.map((_, index) => (
+        <motion.div
+          key={index}
+          className="absolute w-2 h-2 bg-[#D6F32F] rounded-full"
+          initial={{
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            scale: 0,
+          }}
+          animate={{
+            y: [0, -30, 0],
+            scale: [0, 1, 0],
+            opacity: [0, 1, 0],
+          }}
+          transition={{
+            duration: 2 + Math.random() * 2,
+            repeat: Infinity,
+            delay: index * 0.2,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
 
 const Hero = () => {
   return (
@@ -53,20 +131,26 @@ const Hero = () => {
         />
       </div>
 
+      <GeometricBackground />
+      <ParticleEffect />
+
       {/* Floating Decorative Elements */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <FloatingElement delay={0.2}>
+        <FloatingElement delay={0.2} rotate>
           <Stars className="absolute top-20 left-1/4 w-8 h-8 text-[#D6F32F]" />
         </FloatingElement>
-        <FloatingElement delay={0.4}>
+        <FloatingElement delay={0.4} rotate>
           <Moon className="absolute top-40 right-1/4 w-8 h-8 text-[#151616]" />
         </FloatingElement>
-        <FloatingElement delay={0.6}>
+        <FloatingElement delay={0.6} rotate>
           <Flower className="absolute bottom-20 left-1/3 w-8 h-8 text-[#D6F32F]" />
+        </FloatingElement>
+        <FloatingElement delay={0.8} rotate>
+          <Sparkles className="absolute top-32 right-1/3 w-8 h-8 text-[#151616]" />
         </FloatingElement>
       </div>
 
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-6 relative z-10">
         {/* Header Section */}
         <motion.div
           className="text-center max-w-3xl mx-auto mb-16"

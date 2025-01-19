@@ -212,6 +212,16 @@ const RegisterPage = () => {
         <div className="space-y-4">
           <FormInput
             icon={Mail}
+            label="Full Name"
+            name="name"
+            type="text"
+            required
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Enter your name"
+          />
+          <FormInput
+            icon={Mail}
             label="Email Address"
             name="email"
             type="email"
