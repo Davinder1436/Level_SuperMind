@@ -102,6 +102,6 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction): void =
   }
 };
 
-router.get('/astro_details', authMiddleware, getAstroDetails);
+router.post('/astro_details', authMiddleware, getAstroDetails);
 
 export default router;
