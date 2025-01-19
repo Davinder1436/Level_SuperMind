@@ -1,3 +1,6 @@
+![Git Repo Cover](https://github.com/user-attachments/assets/65e4a18b-4369-4ab2-be26-6b3e0afdb1d2)
+
+
 # Level_SuperMind
 # SoulBuddy - AI-Powered Spiritual Guide
 
