@@ -1,152 +1,229 @@
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Gem,
-  Star,
-  Heart,
-  ChevronRight,
-  Info,
-  ShoppingBag,
-  Battery,
-  Sparkles,
-  Moon,
-} from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../../hooks/useAuth";
+import { motion } from "framer-motion";
+import { Gem, Loader, Calendar, Star } from "lucide-react";
 
-// Gemstone Card Component
-const GemstoneCard = ({ gemstone }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  return (
-    <motion.div
-      whileHover={{ y: -5 }}
-      className="bg-white rounded-xl border-2 border-[#151616] shadow-[4px_4px_0px_0px_#151616] overflow-hidden">
-      <div className="p-6">
-        <div className="flex items-start gap-4 mb-4">
-          <div
-            className={`w-16 h-16 ${gemstone.color} rounded-xl flex items-center justify-center border-2 border-[#151616]`}>
-            <Gem className="w-8 h-8 text-[#151616]" />
-          </div>
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-[#151616] mb-1">
-              {gemstone.name}
-            </h3>
-            <div className="flex items-center gap-2 text-[#151616]/70 text-sm">
-              <Battery className="w-4 h-4" />
-              <span>Power Level: {gemstone.powerLevel}</span>
-            </div>
-          </div>
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="p-2 hover:bg-[#D6F32F]/10 rounded-lg"
-            onClick={() => setIsExpanded(!isExpanded)}>
-            <motion.div
-              animate={{ rotate: isExpanded ? 90 : 0 }}
-              transition={{ duration: 0.2 }}>
-              <ChevronRight className="w-5 h-5 text-[#151616]" />
-            </motion.div>
-          </motion.button>
-        </div>
-
-        <div className="flex gap-2 mb-4">
-          {gemstone.benefits.map((benefit, index) => (
-            <span
-              key={index}
-              className="px-3 py-1 bg-[#D6F32F]/10 rounded-full text-sm text-[#151616]">
-              {benefit}
-            </span>
-          ))}
-        </div>
-
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mt-4 space-y-4">
-              <p className="text-[#151616]/70">{gemstone.description}</p>
-
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Heart className="w-4 h-4 text-[#151616]" />
-                  <span className="text-sm text-[#151616]">
-                    Best for: {gemstone.bestFor}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#151616]" />
-                  <span className="text-sm text-[#151616]">
-                    Usage: {gemstone.usage}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex justify-between items-center pt-4 border-t border-[#151616]/10">
-                <div className="flex items-center gap-2">
-                  <Info className="w-4 h-4 text-[#151616]/70" />
-                  <span className="text-sm text-[#151616]/70">
-                    Authenticity verified
-                  </span>
-                </div>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-4 py-2 bg-[#D6F32F] rounded-xl border-2 border-[#151616] 
-                    shadow-[4px_4px_0px_0px_#151616] hover:shadow-[2px_2px_0px_0px_#151616] 
-                    hover:translate-x-[2px] hover:translate-y-[2px] transition-all
-                    flex items-center gap-2">
-                  <ShoppingBag className="w-4 h-4" />
-                  <span className="font-medium">Shop Now</span>
-                </motion.button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.div>
-  );
+const zodiacData = {
+  "21.3-19.4": {
+    "Zodiac Sign": "Aries",
+    "Ruling Planet": "Mars",
+    Gemstones: [
+      { Gemstone: "Red Coral", Description: "Enhances courage and vitality." },
+      {
+        Gemstone: "Bloodstone",
+        Description: "Promotes strength and endurance.",
+      },
+    ],
+  },
+  "20.4-20.5": {
+    "Zodiac Sign": "Taurus",
+    "Ruling Planet": "Venus",
+    Gemstones: [
+      { Gemstone: "Emerald", Description: "Brings prosperity and harmony." },
+      { Gemstone: "Lapis Lazuli", Description: "Encourages wisdom and truth." },
+    ],
+  },
+  "21.5-20.6": {
+    "Zodiac Sign": "Gemini",
+    "Ruling Planet": "Mercury",
+    Gemstones: [
+      {
+        Gemstone: "Agate",
+        Description: "Improves communication and intellect.",
+      },
+      {
+        Gemstone: "Citrine",
+        Description: "Stimulates creativity and mental clarity.",
+      },
+    ],
+  },
+  "21.6-22.7": {
+    "Zodiac Sign": "Cancer",
+    "Ruling Planet": "Moon",
+    Gemstones: [
+      {
+        Gemstone: "Pearl",
+        Description: "Enhances emotional balance and intuition.",
+      },
+      {
+        Gemstone: "Moonstone",
+        Description: "Promotes inner growth and strength.",
+      },
+    ],
+  },
+  "23.7-22.8": {
+    "Zodiac Sign": "Leo",
+    "Ruling Planet": "Sun",
+    Gemstones: [
+      { Gemstone: "Ruby", Description: "Boosts confidence and vitality." },
+      {
+        Gemstone: "Peridot",
+        Description: "Encourages abundance and prosperity.",
+      },
+    ],
+  },
+  "23.8-22.9": {
+    "Zodiac Sign": "Virgo",
+    "Ruling Planet": "Mercury",
+    Gemstones: [
+      {
+        Gemstone: "Sapphire",
+        Description: "Enhances wisdom and mental clarity.",
+      },
+      {
+        Gemstone: "Carnelian",
+        Description: "Promotes creativity and motivation.",
+      },
+    ],
+  },
+  "23.9-22.10": {
+    "Zodiac Sign": "Libra",
+    "Ruling Planet": "Venus",
+    Gemstones: [
+      { Gemstone: "Opal", Description: "Encourages love and passion." },
+      { Gemstone: "Peridot", Description: "Brings harmony and balance." },
+    ],
+  },
+  "23.10-21.11": {
+    "Zodiac Sign": "Scorpio",
+    "Ruling Planet": "Mars",
+    Gemstones: [
+      { Gemstone: "Topaz", Description: "Enhances strength and courage." },
+      {
+        Gemstone: "Aquamarine",
+        Description: "Promotes emotional healing and clarity.",
+      },
+    ],
+  },
+  "22.11-21.12": {
+    "Zodiac Sign": "Sagittarius",
+    "Ruling Planet": "Jupiter",
+    Gemstones: [
+      {
+        Gemstone: "Turquoise",
+        Description: "Encourages optimism and good fortune.",
+      },
+      {
+        Gemstone: "Amethyst",
+        Description: "Promotes spiritual growth and tranquility.",
+      },
+    ],
+  },
+  "22.12-19.1": {
+    "Zodiac Sign": "Capricorn",
+    "Ruling Planet": "Saturn",
+    Gemstones: [
+      {
+        Gemstone: "Garnet",
+        Description: "Enhances determination and perseverance.",
+      },
+      { Gemstone: "Onyx", Description: "Provides strength and support." },
+    ],
+  },
+  "20.1-18.2": {
+    "Zodiac Sign": "Aquarius",
+    "Ruling Planet": "Uranus",
+    Gemstones: [
+      {
+        Gemstone: "Amethyst",
+        Description: "Promotes spiritual awareness and intuition.",
+      },
+      { Gemstone: "Garnet", Description: "Encourages passion and energy." },
+    ],
+  },
+  "19.2-20.3": {
+    "Zodiac Sign": "Pisces",
+    "Ruling Planet": "Neptune",
+    Gemstones: [
+      {
+        Gemstone: "Aquamarine",
+        Description: "Enhances intuition and emotional healing.",
+      },
+      { Gemstone: "Jade", Description: "Promotes serenity and balance." },
+    ],
+  },
 };
 
-const GemstoneRecommendations = () => {
-  const userProfile = {
-    sign: "Leo",
-    element: "Fire",
-    planet: "Sun",
-  };
+const getZodiacSign = (dobString) => {
+  // Parse the date string (format: YYYY-MM-DD)
+  const [year, month, day] = dobString.split("-").map(Number);
+  const monthDay = `${day}.${month}`;
 
-  const recommendedGemstones = [
-    {
-      name: "Ruby",
-      color: "bg-[#FFE8EC]",
-      powerLevel: "Very High",
-      benefits: ["Energy", "Leadership", "Confidence"],
-      description:
-        "Ruby is the stone of nobility, considered the most magnificent of all gems. It symbolizes the sun and its glowing hue suggests an inextinguishable flame within the stone.",
-      bestFor: "Enhancing personal power and leadership abilities",
-      usage: "Wear as a pendant close to the heart chakra",
-    },
-    {
-      name: "Yellow Sapphire",
-      color: "bg-[#FFF4E8]",
-      powerLevel: "High",
-      benefits: ["Wisdom", "Prosperity", "Spirituality"],
-      description:
-        "Yellow Sapphire is associated with Jupiter and brings wealth, wisdom, and spiritual growth. It helps in developing a broader perspective in life.",
-      bestFor: "Academic success and spiritual development",
-      usage: "Wear as a ring on the index finger",
-    },
-    {
-      name: "Pearl",
-      color: "bg-[#E8F4FF]",
-      powerLevel: "Medium",
-      benefits: ["Peace", "Purity", "Intuition"],
-      description:
-        "Pearl is associated with the Moon and helps in balancing emotions. It brings inner peace and enhances intuitive abilities.",
-      bestFor: "Emotional balance and mental clarity",
-      usage: "Wear as a necklace or earrings",
-    },
-  ];
+  // Find matching zodiac sign
+  for (const [dateRange, data] of Object.entries(zodiacData)) {
+    const [start, end] = dateRange.split("-");
+    const [startDay, startMonth] = start.split(".").map(Number);
+    const [endDay, endMonth] = end.split(".").map(Number);
+
+    // Handle special case for Capricorn (across year boundary)
+    if (endMonth < startMonth) {
+      if (
+        (month === startMonth && day >= startDay) ||
+        (month === 12 && day >= startDay) ||
+        (month === 1 && day <= endDay)
+      ) {
+        return data;
+      }
+    } else {
+      // Normal case
+      if (
+        (month === startMonth && day >= startDay) ||
+        (month === endMonth && day <= endDay)
+      ) {
+        return data;
+      }
+    }
+  }
+  return null;
+};
+
+const GemstoneCard = ({ gemstone, description }) => (
+  <motion.div
+    whileHover={{ y: -5 }}
+    className="bg-white rounded-xl p-6 border-2 border-gray-900 shadow-[4px_4px_0px_0px_#151616]">
+    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center border-2 border-gray-900 mb-4">
+      <Gem className="w-6 h-6 text-purple-600" />
+    </div>
+    <h3 className="text-xl font-bold text-gray-900 mb-2">{gemstone}</h3>
+    <p className="text-gray-600">{description}</p>
+  </motion.div>
+);
+
+const GemstoneRecommendations = () => {
+  const { user } = useAuth();
+  const [zodiacInfo, setZodiacInfo] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (user?.dob) {
+      const info = getZodiacSign(user.dob);
+      setZodiacInfo(info);
+    }
+    setIsLoading(false);
+  }, [user]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader className="w-8 h-8 animate-spin text-gray-900" />
+      </div>
+    );
+  }
+
+  if (!user?.dob || !zodiacInfo) {
+    return (
+      <div className="text-center p-8 bg-white rounded-xl border-2 border-gray-900 shadow-[4px_4px_0px_0px_#151616]">
+        <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-900" />
+        <h3 className="text-xl font-bold text-gray-900 mb-2">
+          Birth Details Required
+        </h3>
+        <p className="text-gray-600">
+          Please ensure your profile has your complete birth details to receive
+          personalized gemstone recommendations.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -156,97 +233,43 @@ const GemstoneRecommendations = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-2 mb-2">
-          <Gem className="w-5 h-5 text-[#151616]" />
-          <span className="text-[#151616]/70">Gemstone Recommendations</span>
+          <Star className="w-5 h-5 text-gray-900" />
+          <span className="text-gray-600">Personalized Recommendations</span>
         </motion.div>
-        <h1 className="text-3xl font-bold text-[#151616]">
-          Your Perfect Gemstones
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">
+          Your Gemstone Guide
         </h1>
       </div>
 
-      {/* User Profile Summary */}
-      <div className="bg-white rounded-xl p-6 border-2 border-[#151616] shadow-[4px_4px_0px_0px_#151616]">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-[#D6F32F] rounded-xl flex items-center justify-center border-2 border-[#151616]">
-            <Star className="w-6 h-6 text-[#151616]" />
+      {/* Zodiac Information */}
+      <div className="bg-white rounded-xl p-6 border-2 border-gray-900 shadow-[4px_4px_0px_0px_#151616] mb-8">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center border-2 border-gray-900">
+            <Star className="w-6 h-6 text-yellow-600" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-[#151616] mb-1">
-              Personalized for {userProfile.sign}
+            <h2 className="text-2xl font-bold text-gray-900">
+              {zodiacInfo["Zodiac Sign"]}
             </h2>
-            <div className="flex items-center gap-4 text-[#151616]/70">
-              <div className="flex items-center gap-1">
-                <Moon className="w-4 h-4" />
-                {userProfile.planet} Ruled
-              </div>
-              <div className="flex items-center gap-1">
-                <Sparkles className="w-4 h-4" />
-                {userProfile.element} Element
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Information Note */}
-      <div className="bg-[#D6F32F]/20 rounded-xl p-4 border-2 border-[#151616]">
-        <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-[#151616] mt-0.5" />
-          <div>
-            <h3 className="font-bold text-[#151616] mb-1">
-              About Your Gemstones
-            </h3>
-            <p className="text-[#151616]/70">
-              These gemstones have been carefully selected based on your
-              astrological profile and current planetary positions. For best
-              results, wear them during their recommended time periods.
+            <p className="text-gray-600">
+              Ruled by {zodiacInfo["Ruling Planet"]}
             </p>
           </div>
         </div>
+        <p className="text-gray-600">
+          Based on your birth date: {new Date(user.dob).toLocaleDateString()}
+        </p>
       </div>
 
-      {/* Gemstone Cards */}
-      <div className="space-y-6">
-        {recommendedGemstones.map((gemstone, index) => (
-          <GemstoneCard key={index} gemstone={gemstone} />
+      {/* Gemstone Recommendations */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {zodiacInfo.Gemstones.map((gem, index) => (
+          <GemstoneCard
+            key={index}
+            gemstone={gem.Gemstone}
+            description={gem.Description}
+          />
         ))}
-      </div>
-
-      {/* Additional Guidelines */}
-      <div className="bg-white rounded-xl p-6 border-2 border-[#151616] shadow-[4px_4px_0px_0px_#151616]">
-        <h3 className="text-xl font-bold text-[#151616] mb-4">
-          Wearing Guidelines
-        </h3>
-        <div className="space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 bg-[#D6F32F]/20 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Moon className="w-4 h-4 text-[#151616]" />
-            </div>
-            <div>
-              <h4 className="font-bold text-[#151616] mb-1">
-                Best Time to Start
-              </h4>
-              <p className="text-[#151616]/70">
-                Begin wearing your gemstone during the waxing moon phase for
-                optimal energy alignment.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 bg-[#D6F32F]/20 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Heart className="w-4 h-4 text-[#151616]" />
-            </div>
-            <div>
-              <h4 className="font-bold text-[#151616] mb-1">
-                Care Instructions
-              </h4>
-              <p className="text-[#151616]/70">
-                Clean your gemstones under running water monthly and charge them
-                under moonlight.
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

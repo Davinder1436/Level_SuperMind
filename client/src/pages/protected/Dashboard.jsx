@@ -1,5 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 import {
   Moon,
   Sun,
@@ -10,7 +12,6 @@ import {
   Gem,
   ScrollText,
   Activity,
-  BedDouble,
   ArrowRight,
   TrendingUp,
   User,
@@ -41,9 +42,16 @@ const StatCard = ({ icon: Icon, label, value, trend, color }) => (
 );
 
 // Quick Action Card Component
-const QuickActionCard = ({ icon: Icon, title, description, color }) => (
+const QuickActionCard = ({
+  icon: Icon,
+  title,
+  description,
+  color,
+  onClick,
+}) => (
   <motion.div
     whileHover={{ scale: 1.02 }}
+    onClick={onClick}
     className="bg-white rounded-xl p-6 border-2 border-[#151616] shadow-[4px_4px_0px_0px_#151616] cursor-pointer">
     <div
       className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center border-2 border-[#151616] mb-4`}>
@@ -85,6 +93,62 @@ const UpcomingEventCard = ({ icon: Icon, title, time, date, color }) => (
 );
 
 const Dashboard = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  // Get user's first name
+  const firstName = user?.name ? user.name.split(" ")[0] : "User";
+
+  // Get zodiac sign based on DOB
+  const getZodiacSign = (dob) => {
+    if (!dob) return null;
+    const date = new Date(dob);
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+
+    if ((month === 3 && day >= 21) || (month === 4 && day <= 19))
+      return "Aries";
+    if ((month === 4 && day >= 20) || (month === 5 && day <= 20))
+      return "Taurus";
+    if ((month === 5 && day >= 21) || (month === 6 && day <= 20))
+      return "Gemini";
+    if ((month === 6 && day >= 21) || (month === 7 && day <= 22))
+      return "Cancer";
+    if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return "Leo";
+    if ((month === 8 && day >= 23) || (month === 9 && day <= 22))
+      return "Virgo";
+    if ((month === 9 && day >= 23) || (month === 10 && day <= 22))
+      return "Libra";
+    if ((month === 10 && day >= 23) || (month === 11 && day <= 21))
+      return "Scorpio";
+    if ((month === 11 && day >= 22) || (month === 12 && day <= 21))
+      return "Sagittarius";
+    if ((month === 12 && day >= 22) || (month === 1 && day <= 19))
+      return "Capricorn";
+    if ((month === 1 && day >= 20) || (month === 2 && day <= 18))
+      return "Aquarius";
+    return "Pisces";
+  };
+
+  const zodiacSign = getZodiacSign(user?.dob);
+
+  // Calculate current moon phase (simplified)
+  const getMoonPhase = () => {
+    const phases = [
+      "New Moon",
+      "Waxing Crescent",
+      "First Quarter",
+      "Waxing Gibbous",
+      "Full Moon",
+      "Waning Gibbous",
+      "Last Quarter",
+      "Waning Crescent",
+    ];
+    const today = new Date();
+    const dayOfMonth = today.getDate();
+    return phases[Math.floor((dayOfMonth % 29.5) / 3.7)];
+  };
+
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
@@ -97,11 +161,12 @@ const Dashboard = () => {
             <Star className="w-5 h-5 text-[#151616]" />
             <span className="text-[#151616]/70">Welcome back,</span>
           </motion.div>
-          <h1 className="text-3xl font-bold text-[#151616]">Sarah Parker</h1>
+          <h1 className="text-3xl font-bold text-[#151616]">{firstName}</h1>
         </div>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          onClick={() => navigate("/profile")}
           className="px-4 py-2 bg-[#D6F32F] rounded-xl border-2 border-[#151616] shadow-[4px_4px_0px_0px_#151616] 
             hover:shadow-[2px_2px_0px_0px_#151616] hover:translate-x-[2px] hover:translate-y-[2px] transition-all
             flex items-center gap-2">
@@ -147,20 +212,25 @@ const Dashboard = () => {
         <QuickActionCard
           icon={Sparkles}
           title="Daily Horoscope"
-          description="Check your personalized astrological insights for today"
+          description={`Check your ${
+            zodiacSign || "personalized"
+          } astrological insights for today`}
           color="bg-[#E8F4FF]"
+          onClick={() => navigate("/horoscope")}
         />
         <QuickActionCard
           icon={Gem}
           title="Gemstone Recommendations"
           description="Discover stones that can enhance your spiritual journey"
           color="bg-[#FFE8EC]"
+          onClick={() => navigate("/recommendations/gemstones")}
         />
         <QuickActionCard
           icon={ScrollText}
           title="Spiritual Practice"
           description="View today's recommended spiritual practices"
           color="bg-[#E8FFE8]"
+          onClick={() => navigate("/recommendations/practices")}
         />
       </div>
 
@@ -181,7 +251,7 @@ const Dashboard = () => {
             />
             <UpcomingEventCard
               icon={Star}
-              title="Astrology Workshop"
+              title={`${zodiacSign || "Astrology"} Workshop`}
               date="Tomorrow"
               time="11:00 AM"
               color="bg-[#FFE8EC]"
@@ -210,7 +280,7 @@ const Dashboard = () => {
                 <span className="font-bold text-[#151616]">Moon Phase</span>
               </div>
               <p className="text-[#151616]/70">
-                Waxing Crescent - Good time for new beginnings
+                {getMoonPhase()} - Good time for new beginnings
               </p>
             </motion.div>
             <motion.div
@@ -218,12 +288,10 @@ const Dashboard = () => {
               className="p-4 rounded-xl bg-[#FFE8EC] border-2 border-[#151616]">
               <div className="flex items-center gap-2 mb-2">
                 <Star className="w-5 h-5 text-[#151616]" />
-                <span className="font-bold text-[#151616]">
-                  Lucky Direction
-                </span>
+                <span className="font-bold text-[#151616]">Your Sign</span>
               </div>
               <p className="text-[#151616]/70">
-                North-East - Favorable for important meetings
+                {zodiacSign || "Update your birth date to see your sign"}
               </p>
             </motion.div>
             <motion.div
@@ -234,7 +302,9 @@ const Dashboard = () => {
                 <span className="font-bold text-[#151616]">Power Crystal</span>
               </div>
               <p className="text-[#151616]/70">
-                Rose Quartz - Enhancing love and harmony today
+                {user?.dob
+                  ? "Your recommended crystal for today"
+                  : "Add your birth date to see recommendations"}
               </p>
             </motion.div>
           </div>

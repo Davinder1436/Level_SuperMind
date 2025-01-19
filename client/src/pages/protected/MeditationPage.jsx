@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Brain,
@@ -13,11 +13,19 @@ import {
   Sparkles,
   Star,
   RefreshCcw,
+  RefreshCw,
   Plus,
 } from "lucide-react";
 
 // Meditation Timer Component
-const MeditationTimer = ({ duration, isActive, onToggle }) => {
+const MeditationTimer = ({ initialDuration = 900 }) => {
+  const [duration, setDuration] = useState(initialDuration);
+  const [isActive, setIsActive] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [startTime, setStartTime] = useState(null);
+  const [pausedTime, setPausedTime] = useState(null);
+  const audioRef = useRef(null);
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -26,8 +34,88 @@ const MeditationTimer = ({ duration, isActive, onToggle }) => {
       .padStart(2, "0")}`;
   };
 
+  const handleComplete = useCallback(() => {
+    setIsActive(false);
+    setStartTime(null);
+    setPausedTime(null);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("Meditation Complete", {
+        body: "Your meditation session has ended.",
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    let intervalId;
+
+    if (isActive && duration > 0) {
+      intervalId = setInterval(() => {
+        setDuration((prevDuration) => {
+          if (prevDuration <= 1) {
+            clearInterval(intervalId);
+            handleComplete();
+            return 0;
+          }
+          return prevDuration - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isActive, handleComplete]);
+
+  const handleToggle = () => {
+    if (!isActive) {
+      // Starting or resuming
+      setIsActive(true);
+      setStartTime(Date.now());
+      if (duration === 0) {
+        setDuration(initialDuration);
+      }
+      if (audioRef.current) {
+        audioRef.current.play();
+      }
+    } else {
+      // Pausing
+      setIsActive(false);
+      setPausedTime(Date.now());
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    }
+  };
+
+  const resetTimer = () => {
+    setIsActive(false);
+    setDuration(initialDuration);
+    setStartTime(null);
+    setPausedTime(null);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  };
+
+  const toggleSound = () => {
+    if (audioRef.current) {
+      audioRef.current.muted = !audioRef.current.muted;
+      setIsMuted(!isMuted);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center">
+      {/* Hidden audio element */}
+      <audio ref={audioRef} loop preload="auto" src="/meditation.mp3" />
+
       <div className="relative w-40 h-40 mb-6">
         {/* Timer Circle */}
         <svg className="w-full h-full transform -rotate-90">
@@ -48,7 +136,7 @@ const MeditationTimer = ({ duration, isActive, onToggle }) => {
             stroke="#D6F32F"
             strokeWidth="4"
             strokeDasharray={440}
-            strokeDashoffset={440 * (1 - duration / 900)} // 15 minutes = 900 seconds
+            strokeDashoffset={440 * (1 - duration / initialDuration)}
             className="transition-all duration-1000"
           />
         </svg>
@@ -62,20 +150,48 @@ const MeditationTimer = ({ duration, isActive, onToggle }) => {
         </div>
       </div>
 
-      {/* Control Button */}
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={onToggle}
-        className="w-16 h-16 bg-[#D6F32F] rounded-full border-2 border-[#151616] shadow-[4px_4px_0px_0px_#151616] 
-          hover:shadow-[2px_2px_0px_0px_#151616] hover:translate-x-[2px] hover:translate-y-[2px] transition-all
-          flex items-center justify-center">
-        {isActive ? (
-          <Pause className="w-6 h-6 text-[#151616]" />
-        ) : (
-          <Play className="w-6 h-6 text-[#151616] ml-1" />
+      {/* Control Buttons */}
+      <div className="flex gap-4">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleToggle}
+          className="w-16 h-16 bg-[#D6F32F] rounded-full border-2 border-[#151616] shadow-[4px_4px_0px_0px_#151616] 
+            hover:shadow-[2px_2px_0px_0px_#151616] hover:translate-x-[2px] hover:translate-y-[2px] transition-all
+            flex items-center justify-center">
+          {isActive ? (
+            <Pause className="w-6 h-6 text-[#151616]" />
+          ) : (
+            <Play className="w-6 h-6 text-[#151616] ml-1" />
+          )}
+        </motion.button>
+
+        {(duration < initialDuration || isActive) && (
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={resetTimer}
+            className="w-16 h-16 bg-white rounded-full border-2 border-[#151616] shadow-[4px_4px_0px_0px_#151616] 
+              hover:shadow-[2px_2px_0px_0px_#151616] hover:translate-x-[2px] hover:translate-y-[2px] transition-all
+              flex items-center justify-center">
+            <RefreshCw className="w-6 h-6 text-[#151616]" />
+          </motion.button>
         )}
-      </motion.button>
+
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={toggleSound}
+          className="w-16 h-16 bg-white rounded-full border-2 border-[#151616] shadow-[4px_4px_0px_0px_#151616] 
+            hover:shadow-[2px_2px_0px_0px_#151616] hover:translate-x-[2px] hover:translate-y-[2px] transition-all
+            flex items-center justify-center">
+          {isMuted ? (
+            <VolumeX className="w-6 h-6 text-[#151616]" />
+          ) : (
+            <Volume2 className="w-6 h-6 text-[#151616]" />
+          )}
+        </motion.button>
+      </div>
     </div>
   );
 };

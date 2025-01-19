@@ -10,8 +10,117 @@ import {
   Activity,
   RefreshCcw,
   Calculator,
+  Loader,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
+
+// Helper function to determine zodiac sign
+const getZodiacInfo = (dob) => {
+  if (!dob) return null;
+
+  const date = new Date(dob);
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  const zodiacData = {
+    Aries: {
+      date: "Mar 21 - Apr 19",
+      element: "Fire",
+      ruler: "Mars",
+      qualities: ["Courageous", "Energetic", "Enthusiastic"],
+    },
+    Taurus: {
+      date: "Apr 20 - May 20",
+      element: "Earth",
+      ruler: "Venus",
+      qualities: ["Patient", "Reliable", "Devoted"],
+    },
+    Gemini: {
+      date: "May 21 - Jun 20",
+      element: "Air",
+      ruler: "Mercury",
+      qualities: ["Adaptable", "Versatile", "Intellectual"],
+    },
+    Cancer: {
+      date: "Jun 21 - Jul 22",
+      element: "Water",
+      ruler: "Moon",
+      qualities: ["Emotional", "Intuitive", "Protective"],
+    },
+    Leo: {
+      date: "Jul 23 - Aug 22",
+      element: "Fire",
+      ruler: "Sun",
+      qualities: ["Creative", "Passionate", "Generous"],
+    },
+    Virgo: {
+      date: "Aug 23 - Sep 22",
+      element: "Earth",
+      ruler: "Mercury",
+      qualities: ["Analytical", "Practical", "Diligent"],
+    },
+    Libra: {
+      date: "Sep 23 - Oct 22",
+      element: "Air",
+      ruler: "Venus",
+      qualities: ["Diplomatic", "Gracious", "Fair-minded"],
+    },
+    Scorpio: {
+      date: "Oct 23 - Nov 21",
+      element: "Water",
+      ruler: "Mars/Pluto",
+      qualities: ["Resourceful", "Powerful", "Passionate"],
+    },
+    Sagittarius: {
+      date: "Nov 22 - Dec 21",
+      element: "Fire",
+      ruler: "Jupiter",
+      qualities: ["Optimistic", "Adventurous", "Philosophical"],
+    },
+    Capricorn: {
+      date: "Dec 22 - Jan 19",
+      element: "Earth",
+      ruler: "Saturn",
+      qualities: ["Responsible", "Disciplined", "Self-controlled"],
+    },
+    Aquarius: {
+      date: "Jan 20 - Feb 18",
+      element: "Air",
+      ruler: "Uranus",
+      qualities: ["Progressive", "Original", "Independent"],
+    },
+    Pisces: {
+      date: "Feb 19 - Mar 20",
+      element: "Water",
+      ruler: "Neptune",
+      qualities: ["Compassionate", "Artistic", "Intuitive"],
+    },
+  };
+
+  if ((month === 3 && day >= 21) || (month === 4 && day <= 19))
+    return { sign: "Aries", ...zodiacData["Aries"] };
+  if ((month === 4 && day >= 20) || (month === 5 && day <= 20))
+    return { sign: "Taurus", ...zodiacData["Taurus"] };
+  if ((month === 5 && day >= 21) || (month === 6 && day <= 20))
+    return { sign: "Gemini", ...zodiacData["Gemini"] };
+  if ((month === 6 && day >= 21) || (month === 7 && day <= 22))
+    return { sign: "Cancer", ...zodiacData["Cancer"] };
+  if ((month === 7 && day >= 23) || (month === 8 && day <= 22))
+    return { sign: "Leo", ...zodiacData["Leo"] };
+  if ((month === 8 && day >= 23) || (month === 9 && day <= 22))
+    return { sign: "Virgo", ...zodiacData["Virgo"] };
+  if ((month === 9 && day >= 23) || (month === 10 && day <= 22))
+    return { sign: "Libra", ...zodiacData["Libra"] };
+  if ((month === 10 && day >= 23) || (month === 11 && day <= 21))
+    return { sign: "Scorpio", ...zodiacData["Scorpio"] };
+  if ((month === 11 && day >= 22) || (month === 12 && day <= 21))
+    return { sign: "Sagittarius", ...zodiacData["Sagittarius"] };
+  if ((month === 12 && day >= 22) || (month === 1 && day <= 19))
+    return { sign: "Capricorn", ...zodiacData["Capricorn"] };
+  if ((month === 1 && day >= 20) || (month === 2 && day <= 18))
+    return { sign: "Aquarius", ...zodiacData["Aquarius"] };
+  return { sign: "Pisces", ...zodiacData["Pisces"] };
+};
 
 // Mock Data - Keep this for fallback
 const HOROSCOPE_DATA = {
@@ -251,15 +360,22 @@ const NumerologySection = () => {
 };
 
 const HoroscopePage = () => {
-  const { getUserZodiacInfo } = useAuth();
+  const { user } = useAuth();
   const [predictions, setPredictions] = useState(null);
+  const [zodiacInfo, setZodiacInfo] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(
     new Date().toLocaleTimeString()
   );
-  const zodiacInfo = getUserZodiacInfo();
 
   useEffect(() => {
-    // Generate random predictions
+    if (user?.dob) {
+      const info = getZodiacInfo(user.dob);
+      setZodiacInfo(info);
+    }
+    setIsLoading(false);
+
+    // Generate predictions
     const predictionOptions = {
       career: [
         "Opportunities for advancement present themselves",
@@ -293,7 +409,32 @@ const HoroscopePage = () => {
     );
 
     setPredictions(dailyPredictions);
-  }, []);
+  }, [user]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader className="w-8 h-8 animate-spin text-gray-900" />
+      </div>
+    );
+  }
+
+  if (!user?.dob) {
+    return (
+      <Card>
+        <div className="text-center p-8">
+          <Star className="w-12 h-12 mx-auto mb-4 text-[#151616]" />
+          <h3 className="text-xl font-bold text-[#151616] mb-2">
+            Birth Date Required
+          </h3>
+          <p className="text-[#151616]/70">
+            Please update your profile with your birth date to receive
+            personalized horoscope readings.
+          </p>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -314,6 +455,7 @@ const HoroscopePage = () => {
           <span>Updated {lastUpdated}</span>
         </div>
       </div>
+
       {/* Main Sign Card */}
       <Card>
         <div className="flex items-center gap-6">
@@ -323,25 +465,26 @@ const HoroscopePage = () => {
           <div>
             <div className="flex items-center gap-3 mb-1">
               <h2 className="text-2xl font-bold text-[#151616]">
-                {HOROSCOPE_DATA.sign}
+                {zodiacInfo?.sign}
               </h2>
               <span className="px-3 py-1 bg-[#D6F32F]/20 rounded-full text-sm">
-                {HOROSCOPE_DATA.ascendant}
+                {zodiacInfo?.date}
               </span>
             </div>
             <div className="flex items-center gap-4 text-[#151616]/70">
               <div className="flex items-center gap-1">
                 <Sun className="w-4 h-4" />
-                <span>Ruled by {HOROSCOPE_DATA.SignLord}</span>
+                <span>Ruled by {zodiacInfo?.ruler}</span>
               </div>
               <div className="flex items-center gap-1">
                 <Flame className="w-4 h-4" />
-                <span>{HOROSCOPE_DATA.tatva} Element</span>
+                <span>{zodiacInfo?.element} Element</span>
               </div>
             </div>
           </div>
         </div>
       </Card>
+
       {/* Core Attributes */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
@@ -402,6 +545,7 @@ const HoroscopePage = () => {
           </div>
         </Card>
       </div>
+
       {/* Daily Predictions */}
       {predictions && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -442,59 +586,24 @@ const HoroscopePage = () => {
           </Card>
         </div>
       )}
-      {/* Spiritual Elements */}
-      <Card>
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-[#D6F32F]/20 rounded-xl flex items-center justify-center border-2 border-[#151616] flex-shrink-0">
-            <Moon className="w-6 h-6 text-[#151616]" />
-          </div>
-          <div className="flex-1">
-            <h2 className="text-xl font-bold text-[#151616] mb-4">
-              Spiritual Elements
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-[#D6F32F]/10 rounded-xl border-2 border-[#151616]">
-                <h3 className="font-bold text-[#151616] mb-2">Nadi</h3>
-                <p className="text-[#151616]">{HOROSCOPE_DATA.Nadi}</p>
-              </div>
-              <div className="p-4 bg-[#D6F32F]/10 rounded-xl border-2 border-[#151616]">
-                <h3 className="font-bold text-[#151616] mb-2">Yunja</h3>
-                <p className="text-[#151616]">{HOROSCOPE_DATA.yunja}</p>
-              </div>
-              <div className="p-4 bg-[#D6F32F]/10 rounded-xl border-2 border-[#151616]">
-                <h3 className="font-bold text-[#151616] mb-2">Tattva</h3>
-                <p className="text-[#151616]">{HOROSCOPE_DATA.tatva}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-      {/* Name & Material Elements */}
+
+      {/* Qualities Section */}
       <Card>
         <h2 className="text-xl font-bold text-[#151616] mb-4">
-          Personal Elements
+          Your {zodiacInfo?.sign} Qualities
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-[#151616]/70">Name Alphabet</span>
-              <span className="font-bold">{HOROSCOPE_DATA.name_alphabet}</span>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {zodiacInfo?.qualities.map((quality, index) => (
+            <div
+              key={index}
+              className="p-4 bg-[#D6F32F]/10 rounded-xl border-2 border-[#151616]">
+              <p className="text-[#151616] font-bold">{quality}</p>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-[#151616]/70">Material</span>
-              <span className="font-bold">{HOROSCOPE_DATA.paya}</span>
-            </div>
-          </div>
+          ))}
         </div>
       </Card>
-      {/* Footer Note */}
-      <div className="text-center text-[#151616]/70 text-sm">
-        <p>
-          Predictions are based on your astrological profile and current
-          planetary positions.
-        </p>
-        <p>For personalized guidance, consult with our expert astrologers.</p>
-      </div>
+
+      {/* Include NumerologySection component here */}
       <NumerologySection />
     </div>
   );

@@ -16,6 +16,7 @@ import {
   Info,
   WifiOff,
 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 // Message Bubble Component
 const MessageBubble = ({ message }) => {
@@ -26,6 +27,44 @@ const MessageBubble = ({ message }) => {
     navigator.clipboard.writeText(message.text);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  // Custom components for markdown styling
+  const components = {
+    p: ({ children }) => (
+      <p className="text-[#151616] leading-relaxed">{children}</p>
+    ),
+    h1: ({ children }) => (
+      <h1 className="text-2xl font-bold text-[#151616] my-3">{children}</h1>
+    ),
+    h2: ({ children }) => (
+      <h2 className="text-xl font-bold text-[#151616] my-2">{children}</h2>
+    ),
+    h3: ({ children }) => (
+      <h3 className="text-lg font-bold text-[#151616] my-2">{children}</h3>
+    ),
+    ul: ({ children }) => (
+      <ul className="list-disc list-inside my-2 space-y-1">{children}</ul>
+    ),
+    ol: ({ children }) => (
+      <ol className="list-decimal list-inside my-2 space-y-1">{children}</ol>
+    ),
+    li: ({ children }) => <li className="text-[#151616]">{children}</li>,
+    code: ({ children }) => (
+      <code className="bg-[#151616]/10 rounded px-1 py-0.5 font-mono text-sm">
+        {children}
+      </code>
+    ),
+    pre: ({ children }) => (
+      <pre className="bg-[#151616]/10 rounded-lg p-3 my-2 overflow-x-auto">
+        {children}
+      </pre>
+    ),
+    blockquote: ({ children }) => (
+      <blockquote className="border-l-4 border-[#151616]/20 pl-4 my-2 italic">
+        {children}
+      </blockquote>
+    ),
   };
 
   return (
@@ -52,8 +91,12 @@ const MessageBubble = ({ message }) => {
           className={`group relative p-4 rounded-xl border-2 border-[#151616] 
           ${isUser ? "bg-[#D6F32F]/20" : "bg-white"}
           hover:shadow-[4px_4px_0px_0px_#151616] transition-shadow`}>
-          <p className="text-[#151616] mb-2 leading-relaxed">{message.text}</p>
-          <div className="flex items-center justify-between gap-4">
+          <div className="prose prose-sm max-w-none">
+            <ReactMarkdown components={components}>
+              {message.text}
+            </ReactMarkdown>
+          </div>
+          <div className="flex items-center justify-between gap-4 mt-4">
             <div className="flex items-center gap-2">
               <Star className="w-3 h-3 text-[#151616]/40" />
               <span className="text-sm text-[#151616]/60">
@@ -257,13 +300,14 @@ const ChatPage = () => {
       setIsLoading(true);
       setError(null);
       setMessages((prev) => [...prev, { text: inputMessage, type: "user" }]);
+      const user = localStorage.getItem("user");
 
       const response = await fetch(
         "https://fc20-13-51-196-191.ngrok-free.app/chat",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ input_value: inputMessage, requestId }),
+          body: JSON.stringify({ input_value: inputMessage + user, requestId }),
         }
       );
 
