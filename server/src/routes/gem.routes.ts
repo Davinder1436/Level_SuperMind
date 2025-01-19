@@ -102,6 +102,6 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction): void =
   }
 };
 
-router.get('/gem_suggestion', authMiddleware, getGemSuggestion);
+router.post('/gem_suggestion', authMiddleware, getGemSuggestion);
 
 export default router;

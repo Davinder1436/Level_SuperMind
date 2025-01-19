@@ -102,6 +102,6 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction): void =
   }
 };
 
-router.get('/birth_chart', authMiddleware, getBirthChart);
+router.post('/birth_chart', authMiddleware, getBirthChart);
 
 export default router;

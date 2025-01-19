@@ -102,6 +102,6 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction): void =
   }
 };
 
-router.get('/planets', authMiddleware, getPlanetPositions);
+router.post('/planets', authMiddleware, getPlanetPositions);
 
 export default router;

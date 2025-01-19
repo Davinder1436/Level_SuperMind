@@ -102,6 +102,6 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction): void =
   }
 };
 
-router.get('/numero_table', authMiddleware, getNumeroTable);
+router.post('/numero_table', authMiddleware, getNumeroTable);
 
 export default router;
